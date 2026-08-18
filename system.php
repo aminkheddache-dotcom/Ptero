@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: AI Chat (Multi-Model)
+ * Plugin Name: AI Chat (MultiModel)
  * Plugin URI:  https://ptero.pro
  * Description: A ChatGPT-style AI chat system with a conversation sidebar, powered by a free OpenAI-compatible AI API. Use the [mlp_ai_chat] shortcode to embed it on any page.
  * Version:     1.7.1
