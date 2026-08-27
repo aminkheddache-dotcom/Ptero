@@ -6,79 +6,7 @@
  * Version:     1.7.1
  * Author:      Amine khd
  * License:     GPL v2 or later
- *
- * Requires in wp-config.php:
- *   define( 'MLP_AURORA_SITE_KEY', 'sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' ); // https://aurora-ai.example
- *   define( 'MLP_EDGEAI_KEY_TOKEN', 'cfut_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' ); // Edge AI provider API token
- *   define( 'MLP_EDGEAI_ACCOUNT_ID',  'your-edge-ai-provider-account-id' );
- *   define( 'MLP_MERIDIAN_KEY', 'sk-nry-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' ); // https://router.meridian-ai.example — powers Laguna S 2.1 (Free)
- *
- * Optional, in wp-config.php (enables the first-time-join captcha, 1.7.0+):
- *   define( 'MLP_TURNSTILE_SITE_KEY',   'your-turnstile-site-key' );   // public
- *   define( 'MLP_TURNSTILE_SECRET_KEY', 'your-turnstile-secret-key' ); // private, server-side only
- *
- * NOTE: As of 1.4.0 the chat no longer requires a logged-in WP user.
- * Guests are identified by a random token generated in the browser and
- * stored in localStorage, so each visitor's conversations stay separate
- * without requiring an account. Because this opens the (paid) chat API
- * to anyone who can load the page, consider pairing this with rate
- * limiting (see the note above register_routes()) if the page is public.
- *
- * As of 1.5.0:
- *   - Conversations and messages are no longer stored in the WordPress
- *     database at all. Everything lives in the visitor's own browser
- *     localStorage; the server only ever sees a chat request in transit
- *     (to call the AI API) and never persists its contents. The server
- *     still keeps small, contentless usage counters (total requests,
- *     first/last-seen per guest name) purely for the admin dashboard.
- *   - Site admins (any user with the `manage_options` capability) see an
- *     extra "Administration" room in the chat sidebar itself, showing
- *     live status for every configured AI model (Online / Offline /
- *     Rate Limited / Blocked / Disabled), site-wide usage stats, and
- *     controls to disable the whole chat or an individual model.
- *
- * As of 1.6.0:
- *   - Every AI reply gets a thumbs up / thumbs down pair. Votes are
- *     tallied per model (not per message — no message content is ever
- *     sent for this) into a single small option, and shown per-provider
- *     in the Administration room / wp-admin dashboard so admins can see
- *     which models people actually like.
- *
- * As of 1.6.1:
- *   - Removed the auto-login-as-shared-"Guest"-account behavior. Logged-
- *     out visitors are no longer signed into any WordPress account; they
- *     stay fully anonymous and are identified only by the per-browser
- *     guest token (already in place since 1.4.0). No shared "Guest" WP
- *     user is created on activation anymore, and MLP_AI_CHAT_GUEST_PASS
- *     is no longer used or required.
- *
- * As of 1.7.0:
- *   - First-time (logged-out) visitors must now clear a Cloudflare
- *     Turnstile challenge in the username modal before they can start
- *     chatting. The token is verified server-side (siteverify) before an
- *     identity/guest token is created. Enabled automatically once both
- *     MLP_TURNSTILE_SITE_KEY and MLP_TURNSTILE_SECRET_KEY are defined in
- *     wp-config.php:
- *       define( 'MLP_TURNSTILE_SITE_KEY',   'your-turnstile-site-key' );
- *       define( 'MLP_TURNSTILE_SECRET_KEY', 'your-turnstile-secret-key' );
- *     If either is missing, the modal falls back to its previous
- *     (no-captcha) behavior. Logged-in WP users never see this modal, so
- *     they're unaffected either way.
- *
- * As of 1.7.1 (performance/CPU hardening):
- *   - /chat and /chat-stream are now rate-limited per identity (logged-in
- *     user id, guest token, or IP as a last resort) to
- *     MLP_AI_CHAT_RATE_LIMIT_PER_MINUTE (30) requests per rolling minute,
- *     returning HTTP 429 once exceeded. This is what actually stops a
- *     single visitor/script from hammering the endpoint and exhausting
- *     CPU with unlimited outbound API calls.
- *   - Added indexes on first_seen/last_seen to the guests table so the
- *     admin dashboard's COUNT(*) queries no longer do a full table scan.
- *   - The admin dashboard/Administration-room data (get_admin_dashboard_data())
- *     is now cached for MLP_AI_CHAT_DASHBOARD_CACHE_SECONDS (30s) instead
- *     of being recomputed — including looping every configured model and
- *     hitting the DB — on every single request.
- */
+ **/
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
@@ -87,19 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'MLP_AI_CHAT_VERSION',   '1.7.1' );
 define( 'MLP_AI_CHAT_API_URL',   'https://your-ai-gateway.example/v1/chat/completions' );
 
-// No auto-login of any kind: logged-out visitors stay logged-out.
-// They're identified purely by the random guest token generated in
-// their browser and stored in localStorage (see requireGuestIdentity()
-// in the front-end script below), which is all this plugin needs to
-// keep each visitor's conversations separate. No WP account is ever
-// created or signed into on a visitor's behalf.
-
-// Available models: id => [ label, key_constant, provider, is_paid, api_url, api_model ]
-// All models below are free. Gateway AI models share the Gateway AI
-// endpoint (MLP_AI_CHAT_API_URL); models from other providers specify their
-// own 'api_url' key which takes precedence over the Gateway AI default.
-// 'api_model' overrides the model name actually sent in the request body,
-// for providers whose API expects a different bare name than our id.
 define( 'MLP_AI_CHAT_MODELS', serialize( array(
 	'aurora-2.5-flash:free' => array(
 		'label'     => 'Aurora 2.5 Flash (Free)',
