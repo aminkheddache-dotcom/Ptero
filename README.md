@@ -9,6 +9,22 @@
 
 ---
 
+## 💖 Sponsors
+
+We are incredibly grateful to our sponsors for their support in keeping Ptero free and accessible for everyone.
+
+<a href="https://agiler.io" target="_blank">
+    <img src="https://ptero.pro/wp-content/uploads/2026/09/Capture.png" alt="Agiler" width="200">
+</a>
+
+<br>
+
+<a href="https://www.jtti.cc/zh/activity/promo-september.html?z=aiptero" target="_blank">
+    <img src="https://ptero.pro/wp-content/uploads/2026/09/article_logo.png" alt="JTTI" width="200">
+</a>
+
+---
+
 ## ✨ Key Features
 
 - **Access Multiple AI Models**: Choose from a wide range of models, including **DeepSeek V4**, **Llama 3.3**, **Qwen**, **MiniMax**, **Mistral**, and more.
@@ -75,8 +91,3 @@ Ptero would not be possible without the amazing open-source AI community and the
 
 - **Website**: [https://ptero.pro](https://ptero.pro)
 - **GitHub**: [https://github.com/aminkheddache-dotcom/Pterocos](https://github.com/aminkheddache-dotcom/Ptero)
-- **Email**: aminekhd@ptero.pro
-
----
-
-*Built with ❤️ for the open-source community.*
